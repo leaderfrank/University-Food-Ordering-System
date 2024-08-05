@@ -1,0 +1,7 @@
+Main Course
+Appetizer
+Salad
+Soup
+Dessert
+Breakfast
+Beverage

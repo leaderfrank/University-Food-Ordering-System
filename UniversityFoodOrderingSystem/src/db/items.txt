@@ -1,0 +1,5 @@
+code,name,price,vendor,category
+ITM003,Cheese Cake,17.25,vendor,Appetizer
+ITM007,Nasi Goreng,9.3,vendor,Main Course
+ITM009,Orange Juice,5.0,vendor,Beverage
+ITM011,Apple Juice,5.0,vendor5,Beverage

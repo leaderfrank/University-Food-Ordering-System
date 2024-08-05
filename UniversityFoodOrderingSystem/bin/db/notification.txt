@@ -1,0 +1,4 @@
+type,from,to,status,timestamp,message,isRead
+Top Up,admin,customer,success,2023-12-04 00:12:04,This ia a test message,1
+Top Up,admin,customer,success,2023-12-04 00:12:04,This ia another test message,1
+Order,vendor,customer,accepted,2023-12-04 00:08:57,Your order has been accepted by the vendor,0

@@ -1,0 +1,6 @@
+username,name,password,type,credit
+admin,admin,123,admin,0.0
+customer,customer,123,customer,30.0
+vendor,vendor,123,vendor,0.0
+driver,driver,123,driver,0.0
+newCustomer,Alex,123456789,customer,120.0

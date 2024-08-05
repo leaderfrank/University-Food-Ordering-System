@@ -1,0 +1,4 @@
+username, name, amount, credit, timestamp
+customer,Alex,20.0,140.0,2023-11-28T15:21:05.754445300
+customer1,Alex1,30.75,170.75,2023-11-30T13:11:16.731246800
+newCustomer,Alex,120.0,120.0,2023-12-07T17:26:27.782354400
