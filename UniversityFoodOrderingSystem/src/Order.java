@@ -6,22 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.swing.JOptionPane;
 
-enum DeliveryOption {
-    OPT_IN,
-    TAKEAWAY,
-    DELIVERY
-}
-
-enum OrderStatus {
-    PENDING,
-    ACCEPTED,
-    REJECTED,
-    UNDER_DELIVERY,
-    DELIVERED
-}
+enum DeliveryOption { OPT_IN, TAKEAWAY, DELIVERY }
+enum OrderStatus { PENDING, ACCEPTED, REJECTED, UNDER_DELIVERY, DELIVERED }
 
 public class Order {
     private int orderId;
@@ -33,132 +21,47 @@ public class Order {
     private DeliveryOption deliveryOption;
     private OrderStatus status;
     private double deliveryCost;
-    private List<OrderReview> reviews;
+    private List<OrderReview> reviews = new ArrayList<>();
 
-    public Order(int orderId, String customerId, String vendorId, String timestamp, List<Item> items,
-            DeliveryOption deliveryOption) {
+    public Order(int orderId, String customerId, String vendorId, String timestamp, List<Item> items, DeliveryOption deliveryOption) {
         this.orderId = orderId;
         this.customerId = customerId;
         this.vendorId = vendorId;
         this.items = items;
-        this.total = calculateTotal(items);
-        this.timestamp = (timestamp != null) ? timestamp : getCurrentTimestamp();
+        this.total = calculateTotal();
+        this.timestamp = timestamp != null ? timestamp : getCurrentTimestamp();
         this.deliveryOption = deliveryOption;
+        this.deliveryCost = calculateDeliveryCost();
         this.status = OrderStatus.PENDING;
-        this.deliveryCost = calculateDeliveryCost(deliveryOption);
-        this.reviews = new ArrayList<>();
     }
 
     private String getCurrentTimestamp() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return dateFormat.format(new Date());
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
 
-    public int getOrderId() {
-        return orderId;
-    }
-
-    public String getCustomerId() {
-        return customerId;
-    }
-
-    public String getVendorId() {
-        return vendorId;
-    }
-
-    public String getItems() {
-        return items.toString();
-    }
-
-    public List<Item> getItemsList() {
-        return items;
-    }
-
-    public double getTotal() {
-        return total;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public DeliveryOption getDeliveryOption() {
-        return deliveryOption;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public double getDeliveryCost() {
-        return deliveryCost;
-    }
-
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
-    }
-
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
-    }
-
-    public void setVendorId(String vendorId) {
-        this.vendorId = vendorId;
-    }
-
-    public void setItems(List<Item> items) {
-        this.items = items;
-        this.total = calculateTotal(items);
-    }
-
-    public void setDeliveryOption(DeliveryOption deliveryOption) {
-        this.deliveryOption = deliveryOption;
-        this.deliveryCost = calculateDeliveryCost(deliveryOption);
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    private double calculateTotal(List<Item> items) {
+    private double calculateTotal() {
         return items.stream().mapToDouble(item -> item.getQuantity() * getItemPrice(item.getItemId())).sum();
     }
 
     private double getItemPrice(String itemId) {
-        // You can implement logic to get the price of an item from a database or other
-        // source
-        return 10.0; // Replace this with actual logic
+        return 10.0; // Placeholder for actual price logic
     }
 
-    private double calculateDeliveryCost(DeliveryOption deliveryOption) {
-        switch (deliveryOption) {
-            case OPT_IN:
-                return 0.0;
-            case TAKEAWAY:
-                return 0.0;
-            case DELIVERY:
-                return 10.0;
-            default:
-                return 0.0;
-        }
+    private double calculateDeliveryCost() {
+        return deliveryOption == DeliveryOption.DELIVERY ? 10.0 : 0.0;
     }
 
-    public void acceptOrder() {
-        this.status = OrderStatus.ACCEPTED;
+    public void acceptOrder() { updateStatus(OrderStatus.ACCEPTED); }
+    public void rejectOrder() { updateStatus(OrderStatus.REJECTED); }
+    public void deliverOrder() { updateStatus(OrderStatus.DELIVERED); }
+
+    private void updateStatus(OrderStatus newStatus) {
+        status = newStatus;
         notifyCustomer();
-    }
-
-    public void rejectOrder() {
-        this.status = OrderStatus.REJECTED;
-        notifyCustomer();
-    }
-
-    public void deliverOrder() {
-        this.status = OrderStatus.DELIVERED;
     }
 
     private void notifyCustomer() {
-        System.out.println("Customer notified about order status: " + this.status);
+        System.out.println("Customer notified about order status: " + status);
     }
 
     public void addReview(OrderReview review) {
@@ -172,68 +75,54 @@ public class Order {
     }
 
     private void writeReviewsToFile() {
-        try (FileWriter writer = new FileWriter("C:\\UniversityFoodOrderingSystem\\src\\db\\reviews.txt",
-                true)) {
+        try (FileWriter writer = new FileWriter("reviews.txt", true)) {
             for (OrderReview review : reviews) {
                 writer.write(review.toFileString() + "\n");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     public void loadReviewsFromFile() {
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader("C:\\UniversityFoodOrderingSystem\\src\\db\\reviews.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("reviews.txt"))) {
+            reader.readLine(); // Skip header
             String line;
-            // Skip the first line (header)
-            reader.readLine();
             while ((line = reader.readLine()) != null) {
-                OrderReview review = OrderReview.fromFileString(line);
-                reviews.add(review);
+                reviews.add(OrderReview.fromFileString(line));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     public void updateReview(OrderReview newReview) {
         for (OrderReview review : reviews) {
-            if (review.getCustomerId().equals(newReview.getCustomerId())
-                    && review.getOrderId() == newReview.getOrderId()) {
+            if (review.getCustomerId().equals(newReview.getCustomerId()) && review.getOrderId() == newReview.getOrderId()) {
                 review.setRating(newReview.getRating());
                 review.setComment(newReview.getComment());
                 writeReviewsToFile();
                 return;
             }
         }
-        // If the review is not found, add the new review
         addReview(newReview);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(orderId).append(",");
-        builder.append(customerId).append(",");
-        builder.append(vendorId).append(",");
-        builder.append(itemsToString()).append(",");
-        builder.append(total).append(",");
-        builder.append(timestamp).append(",");
-        builder.append(deliveryOption).append(",");
-        builder.append(status).append(",");
-        builder.append(deliveryCost);
-
-        return builder.toString();
+        return String.join(",",
+            String.valueOf(orderId),
+            customerId,
+            vendorId,
+            itemsToString(),
+            String.valueOf(total),
+            timestamp,
+            deliveryOption.name(),
+            status.name(),
+            String.valueOf(deliveryCost)
+        );
     }
 
     private String itemsToString() {
-        StringBuilder itemsBuilder = new StringBuilder();
-        for (Item item : items) {
-            itemsBuilder.append(item.getItemId()).append(":").append(item.getQuantity()).append("|");
-        }
-        // Remove the trailing comma
-        return itemsBuilder.substring(0, itemsBuilder.length() - 1);
+        return items.stream()
+                .map(item -> item.getItemId() + ":" + item.getQuantity())
+                .reduce((a, b) -> a + "|" + b)
+                .orElse("");
     }
-
 }
